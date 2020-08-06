@@ -2,18 +2,26 @@ version: '2.0'
 services:
   web:
     image: docker.pkg.github.com/propulsioncarriere/propulsetacarriere/nginx:latest
+    restart: always
     ports:
     - "8080:80"
     depends_on:
     - app
   app:
-    image: docker.pkg.github.com/propulsioncarriere/propulsetacarriere/app:latest
+    build:
+      context: .
+      dockerfile: ./dockers/app.dockerfile
+      args:
+        UID: ${UID}
+        GID: ${GID}
+    restart: always
     depends_on:
     - database
     volumes:
-    - ".env:/var/www/.env"
+    - uploads:/var/www/storage/public
   database:
     image: mysql:5.6
+    restart: always
     volumes:
       - dbdata:/var/lib/mysql
     environment:
@@ -21,5 +29,17 @@ services:
       - "MYSQL_USER=${DB_USERNAME}"
       - "MYSQL_PASSWORD=${DB_PASSWORD}"
       - "MYSQL_RANDOM_ROOT_PASSWORD=TRUE"
+  backup:
+      build: 
+        context: .
+        dockerfile: ./dockers/backup.dockerfile
+        args:
+          UID: ${UID}
+          GID: ${GID}
+      volumes:
+      - dbdata:/var/lib/mysql
+      - uploads:/var/www/storage/public
+      - "./export:/export"
 volumes:
   dbdata:
+  uploads:
