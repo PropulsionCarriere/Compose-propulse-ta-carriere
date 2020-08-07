@@ -15,10 +15,11 @@ services:
         UID: ${UID}
         GID: ${GID}
     restart: always
+    user: ${UID}
     depends_on:
     - database
     volumes:
-    - uploads:/var/www/storage/public
+    - uploads:/var/www/storage/app/public
   database:
     image: mysql:5.6
     restart: always
@@ -38,7 +39,7 @@ services:
           GID: ${GID}
       volumes:
       - dbdata:/var/lib/mysql
-      - uploads:/var/www/storage/public
+      - uploads:/var/www/storage/app/public
       - "./export:/export"
 volumes:
   dbdata:
